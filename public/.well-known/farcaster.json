@@ -1,0 +1,30 @@
+{
+  "accountAssociation": {
+      "header": "TODO_REPLACE_BASE64_HEADER",
+      "payload": "TODO_REPLACE_BASE64_PAYLOAD",
+      "signature": "TODO_REPLACE_BASE64_SIGNATURE"
+  },
+  "miniapp": {
+      "version": "1",
+      "name": "QuickQR",
+      "homeUrl": "https://quickqr.example.com/",
+      "iconUrl": "https://quickqr.example.com/assets/icon.png",
+      "splashImageUrl": "https://quickqr.example.com/assets/splash.png",
+      "splashBackgroundColor": "#020617",
+
+      "subtitle": "Turn any text into a QR in a tap.",
+      "description": "QuickQR is a tiny mini app that instantly converts any text or URL into a clean QR code, perfect for sharing links, WiFi, or notes inside Base and Farcaster.",
+      "primaryCategory": "UTILITY",
+      "tags": ["fun","simple","utility"],
+
+      "heroImageUrl": "https://quickqr.example.com/assets/hero.png",
+      "ogTitle": "QuickQR",
+      "ogDescription": "Generate and share QR codes in seconds with QuickQR, a beautiful one-screen mini app for Base and Farcaster.",
+      "ogImageUrl": "https://quickqr.example.com/assets/hero.png",
+
+      "screenshotUrls": [
+         "https://quickqr.example.com/assets/hero.png"
+      ],
+      "noindex": true
+  }
+}

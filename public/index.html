@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>QuickQR – Tiny QR Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="description" content="Generate and share QR codes in seconds with QuickQR, a beautiful one-screen mini app for Base and Farcaster." />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="QuickQR" />
+  <meta property="og:description" content="Generate and share QR codes in seconds with QuickQR, a beautiful one-screen mini app for Base and Farcaster." />
+  <meta property="og:url" content="https://quickqr.example.com/" />
+  <meta property="og:image" content="https://quickqr.example.com/assets/hero.png" />
+
+  <!-- Farcaster Mini App -->
+  <meta
+    name="fc:miniapp"
+    content='{"version":"1","imageUrl":"https://quickqr.example.com/assets/embed-3x2.png","button":{"title":"Open QuickQR","action":{"type":"launch_frame","url":"https://quickqr.example.com/"}},"splashImageUrl":"https://quickqr.example.com/assets/splash.png","splashBackgroundColor":"#020617"}'
+  />
+
+  <!-- Farcaster Frame (backwards compatible) -->
+  <meta
+    name="fc:frame"
+    content='{"version":"next","imageUrl":"https://quickqr.example.com/assets/embed-3x2.png","button":{"title":"Open QuickQR","action":{"type":"launch_frame","url":"https://quickqr.example.com/"}},"splashImageUrl":"https://quickqr.example.com/assets/splash.png","splashBackgroundColor":"#020617"}'
+  />
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #020617;
+      --bg-elevated: rgba(15,23,42,0.96);
+      --accent: #22c55e;
+      --accent-soft: rgba(34,197,94,0.12);
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --radius-xl: 22px;
+      --shadow-soft: 0 18px 45px rgba(15,23,42,0.85);
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+      background: radial-gradient(circle at top, #020617 0, #000 70%);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 480px;
+      background: linear-gradient(145deg, rgba(15,23,42,0.98), rgba(15,23,42,0.9));
+      border-radius: 28px;
+      border: 1px solid rgba(148,163,184,0.25);
+      box-shadow: var(--shadow-soft);
+      padding: 18px 18px 14px;
+      backdrop-filter: blur(24px);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .app-header {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 4px 6px 4px;
+    }
+
+    .badge {
+      align-self: flex-start;
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, rgba(34,197,94,0.18), rgba(34,197,94,0.04));
+      color: #bbf7d0;
+      border: 1px solid rgba(34,197,94,0.45);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .badge::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 8px rgba(34,197,94,0.9);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: 0.02em;
+    }
+
+    .subtitle {
+      margin: 0;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .card {
+      margin-top: 4px;
+      background:
+        radial-gradient(circle at top left, rgba(34,197,94,0.19), transparent 55%),
+        radial-gradient(circle at top right, rgba(59,130,246,0.22), transparent 60%),
+        var(--bg-elevated);
+      border-radius: var(--radius-xl);
+      padding: 14px 14px 12px;
+      border: 1px solid rgba(148,163,184,0.35);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .input-block {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .input-label {
+      font-size: 13px;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .pill-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+    }
+
+    textarea {
+      resize: none;
+      border-radius: 16px;
+      border: 1px solid rgba(148,163,184,0.5);
+      background: rgba(15,23,42,0.96);
+      padding: 9px 10px;
+      min-height: 72px;
+      font-size: 13px;
+      color: var(--text);
+      font-family: inherit;
+      outline: none;
+    }
+
+    textarea::placeholder {
+      color: rgba(148,163,184,0.8);
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .size-control {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .size-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #size-label {
+      font-variant-numeric: tabular-nums;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.5);
+      background: rgba(15,23,42,0.96);
+      font-size: 12px;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.85);
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: #22c55e;
+      border: 2px solid #0f172a;
+      box-shadow: 0 0 0 4px rgba(34,197,94,0.26);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: #22c55e;
+      border: 2px solid #0f172a;
+    }
+
+    .select-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    select {
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.5);
+      background: rgba(15,23,42,0.96);
+      color: var(--text);
+      font-size: 12px;
+      padding: 3px 8px;
+      outline: none;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .primary-btn,
+    .ghost-btn {
+      border-radius: 999px;
+      padding: 7px 13px;
+      font-size: 13px;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex: 1;
+      justify-content: center;
+      transition: all 0.12s ease-out;
+    }
+
+    .primary-btn {
+      background: radial-gradient(circle at top left, #22c55e, #16a34a);
+      color: #022c22;
+      box-shadow: 0 10px 28px rgba(34,197,94,0.58);
+    }
+
+    .primary-btn:active {
+      transform: translateY(1px) scale(0.98);
+      box-shadow: 0 6px 18px rgba(34,197,94,0.5);
+    }
+
+    .ghost-btn {
+      background: rgba(15,23,42,0.96);
+      color: var(--muted);
+      border: 1px solid rgba(148,163,184,0.6);
+    }
+
+    .ghost-btn:active {
+      transform: translateY(1px) scale(0.98);
+    }
+
+    .primary-btn span.icon {
+      font-size: 14px;
+    }
+
+    .preview-card {
+      margin-top: 4px;
+      border-radius: 18px;
+      padding: 10px;
+      background: rgba(15,23,42,0.96);
+      border: 1px solid rgba(148,163,184,0.45);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .preview-header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .qr-shell {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 0 4px;
+    }
+
+    .qr-placeholder {
+      width: 180px;
+      height: 180px;
+      border-radius: 24px;
+      border: 1px dashed rgba(148,163,184,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: rgba(148,163,184,0.9);
+      text-align: center;
+      padding: 10px;
+    }
+
+    #qr-image {
+      display: none;
+      border-radius: 18px;
+      background: #fff;
+    }
+
+    #qr-image.visible {
+      display: block;
+    }
+
+    .preview-actions {
+      width: 100%;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      font-size: 11px;
+    }
+
+    .linkish {
+      border-radius: 999px;
+      padding: 4px 8px;
+      border: 1px solid rgba(148,163,184,0.6);
+      background: rgba(15,23,42,0.96);
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .app-footer {
+      margin-top: 4px;
+      padding: 2px 4px 0;
+      font-size: 10px;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      padding: 8px 12px;
+      font-size: 11px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.98);
+      border: 1px solid rgba(34,197,94,0.9);
+      color: #bbf7d0;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease-out, transform 0.15s ease-out;
+      transform-origin: bottom center;
+    }
+
+    .toast.visible {
+      opacity: 1;
+      transform: translate(-50%, -4px);
+    }
+
+    @media (max-width: 480px) {
+      .app {
+        border-radius: 0;
+        box-shadow: none;
+        border-left: none;
+        border-right: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <div class="badge" id="env-badge">Web</div>
+      <h1>QuickQR</h1>
+      <p class="subtitle" id="subtitle">Turn any text into a QR in a tap.</p>
+    </header>
+
+    <main class="card">
+      <section class="input-block">
+        <div class="input-label">
+          <span>Text or URL</span>
+          <span class="pill-label">Local · No storage</span>
+        </div>
+        <textarea id="qr-input" placeholder="Paste a link, WiFi details, or a short note to turn into a QR code."></textarea>
+      </section>
+
+      <section class="row" style="margin-top:8px;">
+        <div class="size-control">
+          <div class="size-top">
+            <span>Size</span>
+            <span id="size-label">240×240</span>
+          </div>
+          <input id="qr-size" type="range" min="160" max="400" value="240" />
+        </div>
+        <div class="select-wrap">
+          <span>Detail</span>
+          <select id="qr-ec-level">
+            <option value="L">L</option>
+            <option value="M" selected>M</option>
+            <option value="Q">Q</option>
+            <option value="H">H</option>
+          </select>
+        </div>
+      </section>
+
+      <section class="btn-row">
+        <button id="generate-btn" class="primary-btn">
+          <span class="icon">▣</span>
+          <span>Generate</span>
+        </button>
+        <button id="clear-btn" class="ghost-btn">
+          Clear
+        </button>
+      </section>
+
+      <section class="preview-card">
+        <div class="preview-header">
+          <span class="pill-label">Preview</span>
+          <button id="download-btn" class="linkish">Save PNG</button>
+        </div>
+        <div class="qr-shell">
+          <div id="qr-placeholder" class="qr-placeholder">
+            Your QR code will appear here after you press Generate.
+          </div>
+          <img id="qr-image" alt="QuickQR preview" />
+        </div>
+        <div class="preview-actions">
+          <span>Tip: generate in chat, show on another device.</span>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <span>Rendered via a public QR image endpoint.</span>
+      <span class="pill-label">Mini · Utility</span>
+    </footer>
+  </div>
+
+  <div id="toast" class="toast">Copied</div>
+
+  <script type="module" src="./script.js"></script>
+</body>
+</html>

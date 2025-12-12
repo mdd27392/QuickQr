@@ -14,7 +14,7 @@
 
       "subtitle": "Turn any text into a QR in a tap.",
       "description": "QuickQR is a tiny mini app that instantly converts any text or URL into a clean QR code, perfect for sharing links, WiFi, or notes inside Base and Farcaster.",
-      "primaryCategory": "UTILITY",
+      "primaryCategory": "utility",
       "tags": ["fun","simple","utility"],
 
       "heroImageUrl": "https://quick-qr-eight.vercel.app/assets/hero.png",
